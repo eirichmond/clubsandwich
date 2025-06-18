@@ -6,6 +6,7 @@
 // include 'staged/staged_functions.php';
 
 require 'config/config.php';
+require 'config/feed-config.php';
 
 // run this first
 // kat_include('core/dbstuff.php');
@@ -87,7 +88,7 @@ function create_robotstxt( $output, $public ) {
 		$output .= "User-agent: *\n";
 		$output .= "Disallow: /?\n";
 		$output .= "Disallow: /terms-and-conditions\n";
-		$output .= "Disallow: /book/d=\n";
+		$output .= "Disallow: /*/book/d=\n";
 		$output .= "Disallow: /houses/*/gallery/\n";
 		$output .= "Disallow: /houses/*/booknow/\n";
 		$output .= "Disallow: /search\n";
@@ -97,7 +98,7 @@ function create_robotstxt( $output, $public ) {
 		$output .= "Disallow: /?s=\n";
 		$output .= "Allow: /availability\n";
 		$output .= "User-agent: SiteAuditBot\n";
-		$output .= "Disallow: /book/d=\n";
+		$output .= "Disallow: /*/book/d=\n";
 	}
 	if ( $id == 24 ) {
 		$output  = '';

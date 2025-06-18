@@ -397,15 +397,61 @@ function change_default_title( $title ) {
 	return $title;
 }
 
+/**
+ * Set up custom house pages and URL structure
+ * Handles routing for house sub-pages and validates URLs
+ */
 function ong_custom_house_pages() {
-	function add_query_vars( $houseVars ) {
-		$houseVars[] = 'current_house_page';
-		$houseVars[] = 'addvariable';
-		return $houseVars;
+	/**
+	 * Add custom query variables for house pages
+	 *
+	 * @param array $query_vars Existing query variables
+	 * @return array Modified query variables
+	 */
+	function add_query_vars( $query_vars ) {
+		$query_vars[] = 'current_house_page';
+		$query_vars[] = 'addvariable';
+		return $query_vars;
 	}
 	add_filter( 'query_vars', 'add_query_vars' );
-	add_rewrite_rule( '^houses/([^/]+)/([^/]+)/([^/]+)/?', 'index.php?houses=$matches[1]&current_house_page=$matches[2]&addvariable=$matches[3]', 'top' );
-	add_rewrite_rule( '^houses/([^/]+)/([^/]+)/?', 'index.php?houses=$matches[1]&current_house_page=$matches[2]', 'top' );
+
+	// Define valid house sub-pages
+	global $valid_house_pages;
+	$valid_house_pages = array('more', 'gallery', 'facts', 'availability', 'booknow');
+
+	// Add the rewrite rules with validation
+	add_rewrite_rule(
+		'^houses/([^/]+)/([^/]+)/?',
+		'index.php?houses=$matches[1]&current_house_page=$matches[2]',
+		'top'
+	);
+
+	// Add filter to validate requests
+	add_action('template_redirect', 'validate_house_url');
+}
+
+/**
+ * Validates house URLs and returns 404 for invalid requests
+ * Prevents random URLs and attachments from being treated as house pages
+ */
+function validate_house_url() {
+	global $wp_query, $valid_house_pages;
+
+	// Only process URLs with house and current_house_page parameters
+	if (isset($wp_query->query_vars['houses']) && isset($wp_query->query_vars['current_house_page'])) {
+		$house_slug = $wp_query->query_vars['houses'];
+		$current_page = $wp_query->query_vars['current_house_page'];
+
+		// Check if the house exists and is of post type 'houses'
+		$house = get_page_by_path($house_slug, OBJECT, 'houses');
+
+		// Check if current page is valid and house exists
+		if (!in_array($current_page, $valid_house_pages) || !$house) {
+			$wp_query->set_404();
+			status_header(404);
+			return;
+		}
+	}
 }
 
 function custom_canonical( $str ) {

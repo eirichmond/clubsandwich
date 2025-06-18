@@ -101,7 +101,7 @@
 										<li><a href="/houses/<?= $the_query->post->post_name;?>/facts/<?= $preview; ?>">key facts</a></li>
 										<li><a class="<?php if ($house->getPage() === 'availability') echo 'active'; ?>" href="/houses/<?= $the_query->post->post_name;?>/availability/<?= $preview; ?>">Availability</a></li>
 										<!-- <li><a href="#getintouch" role="button" data-toggle="modal" data-backdrop="static">Enquire</a></li> -->
-										<li><span id="st-trigger-effects"><a href="#getintouch" data-effect="st-effect-3" data-toggle="modal">Enquire</a></span></li>
+										<!-- <li><span id="st-trigger-effects"><a href="#getintouch" data-effect="st-effect-3" data-toggle="modal">Enquire</a></span></li> -->
 										<li><a href="/special-offers">Offers</a></li>
 										<li><a href="https://kateandtoms.com/houses/the-moult-wing/availability/">The Wing</a></li>
 										<li><a class="btn btn-3 litehouse <?php if ($house->getPage() === 'book' || $house->getPage() === 'booknow') echo 'active'; ?>" href="/houses/<?= $the_query->post->post_name;?>/booknow/<?= $preview; ?>">Book Now</a></li>
