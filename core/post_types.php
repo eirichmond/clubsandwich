@@ -417,7 +417,7 @@ function ong_custom_house_pages() {
 
 	// Define valid house sub-pages
 	global $valid_house_pages;
-	$valid_house_pages = array('more', 'gallery', 'facts', 'availability', 'booknow');
+	$valid_house_pages = array( 'more', 'gallery', 'facts', 'availability', 'booknow' );
 
 	// Add the rewrite rules with validation
 	add_rewrite_rule(
@@ -427,7 +427,7 @@ function ong_custom_house_pages() {
 	);
 
 	// Add filter to validate requests
-	add_action('template_redirect', 'validate_house_url');
+	add_action( 'template_redirect', 'validate_house_url' );
 }
 
 /**
@@ -438,18 +438,30 @@ function validate_house_url() {
 	global $wp_query, $valid_house_pages;
 
 	// Only process URLs with house and current_house_page parameters
-	if (isset($wp_query->query_vars['houses']) && isset($wp_query->query_vars['current_house_page'])) {
-		$house_slug = $wp_query->query_vars['houses'];
-		$current_page = $wp_query->query_vars['current_house_page'];
+	if ( isset( $wp_query->query_vars['houses'] ) && isset( $wp_query->query_vars['current_house_page'] ) ) {
+		$house_slug = strtolower( $wp_query->query_vars['houses'] );
+		$current_page = strtolower( $wp_query->query_vars['current_house_page'] );
 
 		// Check if the house exists and is of post type 'houses'
-		$house = get_page_by_path($house_slug, OBJECT, 'houses');
+		$house = get_page_by_path( $house_slug, OBJECT, 'houses' );
+
+		// Convert valid pages to lowercase for comparison
+		$valid_house_pages_lower = array_map( 'strtolower', $valid_house_pages );
 
 		// Check if current page is valid and house exists
-		if (!in_array($current_page, $valid_house_pages) || !$house) {
+		if ( ! in_array( $current_page, $valid_house_pages_lower ) || ! $house ) {
 			$wp_query->set_404();
-			status_header(404);
+			status_header( 404 );
 			return;
+		}
+
+		// If URL has uppercase letters, redirect to lowercase version
+		$requested_uri = $_SERVER['REQUEST_URI'];
+		$lowercase_uri = strtolower( $requested_uri );
+
+		if ( $requested_uri !== $lowercase_uri ) {
+			wp_redirect( $lowercase_uri, 301 );
+			exit();
 		}
 	}
 }
