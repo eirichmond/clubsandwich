@@ -417,17 +417,34 @@ function ong_custom_house_pages() {
 
 	// Define valid house sub-pages
 	global $valid_house_pages;
-	$valid_house_pages = array( 'more', 'gallery', 'facts', 'availability', 'booknow' );
+	$valid_house_pages = array( 'more', 'gallery', 'facts', 'availability', 'booknow', 'book' );
 
 	// Add the rewrite rules with validation
+	// THREE-SEGMENT RULE FIRST (higher priority)
 	add_rewrite_rule(
-		'^houses/([^/]+)/([^/]+)/?',
+		'^houses/([^/]+)/([^/]+)/([^/]+)/?$',
+		'index.php?houses=$matches[1]&current_house_page=$matches[2]&addvariable=$matches[3]',
+		'top'
+	);
+
+	// TWO-SEGMENT RULE SECOND (lower priority)
+	add_rewrite_rule(
+		'^houses/([^/]+)/([^/]+)/?$',
 		'index.php?houses=$matches[1]&current_house_page=$matches[2]',
 		'top'
 	);
 
 	// Add filter to validate requests
 	add_action( 'template_redirect', 'validate_house_url' );
+
+	// Flush rewrite rules on theme activation/updates (only if needed)
+	$rules_version = get_option( 'kat_custom_rewrite_rules_version', '1.0' );
+	$current_version = '1.1'; // Update this when you modify rules
+
+	if ( version_compare( $rules_version, $current_version, '<' ) ) {
+		flush_rewrite_rules();
+		update_option( 'kat_custom_rewrite_rules_version', $current_version );
+	}
 }
 
 /**
