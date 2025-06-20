@@ -491,3 +491,144 @@ function custom_save_houses_callback() {
 		error_log( 'Post updated: ' . $house->ID );
 	}
 }
+
+/**
+ * Process CSV redirects and add them to Yoast SEO Premium redirects.
+ *
+ * This function reads a CSV file from the theme directory, processes URLs that have
+ * 4 parts (domain + 3 path segments), creates redirect entries, and adds them to
+ * the Yoast SEO Premium redirects option in blog ID 11.
+ */
+function kate_and_toms_process_csv_redirects_callback() {
+	// Switch to blog ID 11
+	switch_to_blog( 11 );
+
+	try {
+		// Get the CSV file path
+		$csv_file_path = get_theme_root() . '/clubsandwich/table.csv';
+
+		if ( ! file_exists( $csv_file_path ) ) {
+			error_log( 'CSV file not found: ' . $csv_file_path );
+			restore_current_blog();
+			return;
+		}
+
+		// Open and read the CSV file
+		$handle = fopen( $csv_file_path, 'r' );
+		if ( false === $handle ) {
+			error_log( 'Could not open CSV file: ' . $csv_file_path );
+			restore_current_blog();
+			return;
+		}
+
+		// Skip the header row
+		fgetcsv( $handle );
+
+		// Get existing redirects from Yoast SEO Premium
+		$existing_redirects = get_option( 'wpseo-premium-redirects-base', array() );
+		if ( is_string( $existing_redirects ) ) {
+			$existing_redirects = maybe_unserialize( $existing_redirects );
+		}
+		if ( ! is_array( $existing_redirects ) ) {
+			$existing_redirects = array();
+		}
+
+		// Create array to track existing origins to avoid duplicates
+		$existing_origins = array();
+		foreach ( $existing_redirects as $redirect ) {
+			if ( isset( $redirect['origin'] ) ) {
+				$existing_origins[] = $redirect['origin'];
+			}
+		}
+
+		$new_redirects = array();
+		$processed_count = 0;
+		$added_count = 0;
+
+		// Process each row in the CSV
+		while ( ( $data = fgetcsv( $handle ) ) !== false ) {
+			$processed_count++;
+
+			// Get the URL from the first column
+			$full_url = isset( $data[0] ) ? trim( $data[0] ) : '';
+
+			if ( empty( $full_url ) ) {
+				continue;
+			}
+
+			// Parse the URL
+			$parsed_url = wp_parse_url( $full_url );
+			if ( false === $parsed_url || ! isset( $parsed_url['host'] ) || ! isset( $parsed_url['path'] ) ) {
+				continue;
+			}
+
+			// Split the path into segments and remove empty ones
+			$path_segments = array_filter( explode( '/', trim( $parsed_url['path'], '/' ) ) );
+
+			// Check if we have at least 3 path segments (plus domain = 4 parts total)
+			if ( count( $path_segments ) < 3 ) {
+				continue;
+			}
+
+			// Only process URLs that contain 'houses' in the path
+			if ( strpos( $parsed_url['path'], 'houses' ) === false ) {
+				continue;
+			}
+
+			// Create the truncated URL with only first 2 path segments
+			$truncated_path = '/' . implode( '/', array_slice( $path_segments, 0, 2 ) ) . '/';
+
+			// Check if this redirect already exists
+			if ( in_array( trim( $parsed_url['path'], '/' ), $existing_origins, true ) ) {
+				continue;
+			}
+
+			// Create the redirect entry
+			$redirect_entry = array(
+				'origin' => trim( $parsed_url['path'], '/' ),
+				'url'    => trim( $truncated_path, '/' ),
+				'type'   => 301,
+				'format' => 'plain',
+			);
+
+			$new_redirects[] = $redirect_entry;
+			$existing_origins[] = trim( $parsed_url['path'], '/' ); // Track to avoid duplicates within this batch
+			$added_count++;
+		}
+
+		fclose( $handle );
+
+		// Add new redirects to existing ones
+		if ( ! empty( $new_redirects ) ) {
+
+			$all_redirects = array_merge( $existing_redirects, $new_redirects );
+
+			// Update the option
+			$update_result = update_option( 'wpseo-premium-redirects-base', $all_redirects );
+
+			if ( $update_result ) {
+				error_log( sprintf(
+					'Successfully processed %d CSV rows, added %d new redirects to Yoast SEO Premium',
+					$processed_count,
+					$added_count
+				) );
+			} else {
+				error_log( 'Failed to update wpseo-premium-redirects-base option' );
+			}
+		} else {
+			error_log( sprintf(
+				'Processed %d CSV rows, but no new redirects were added (all may already exist)',
+				$processed_count
+			) );
+		}
+
+	} catch ( Exception $e ) {
+		error_log( 'Error processing CSV redirects: ' . $e->getMessage() );
+	} finally {
+		// Always restore the original blog context
+		restore_current_blog();
+	}
+}
+
+// Register the action hook
+add_action( 'kate_and_toms_process_csv_redirects', 'kate_and_toms_process_csv_redirects_callback' );
