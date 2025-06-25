@@ -594,6 +594,7 @@ acf_add_local_field_group(array (
 					'min' => '',
 					'max' => '',
 				),
+				kat_widget_row('faq_group', 'FAQs Group', 'faq_group', 0),
 			),
 		),
 	),

@@ -1,4 +1,3 @@
-
 <?php
 	global $katglobals;
 	function encode_email_address($email) {
@@ -57,7 +56,7 @@
 	<div class="container footer">
 		<div class="row">
 			<div class="span10">
-				<img loading="lazy" class="katlogo" src="<?php bloginfo('template_directory'); ?>/images/katandtoms-trans.jpg" alt="kate and toms logo">
+				<img loading="lazy" class="katlogo mhide" src="<?php bloginfo('template_directory'); ?>/images/katandtoms-trans.jpg" alt="kate and toms logo">
 			</div>
 
 
@@ -66,7 +65,7 @@
 
 				<ul class="sharing-icons pull-right">
 					<li>
-						<a href="https://uk.linkedin.com/company/the-big-cottage-company" target="_blank">
+						<a href="https://www.linkedin.com/company/kate-and-toms" target="_blank">
 							<i class="fa-brands fa-linkedin fa-2xl"></i>
 
 						</a>
@@ -100,23 +99,33 @@
 					</li>
 
 				</ul>
+
+
 			</div>
 		</div>
 		<div class="row">
 			<div class="span4">
-				<img loading="lazy" class="extra-strap" src="<?php bloginfo('template_directory'); ?>/images/extstrap.jpg" alt="extraordinary holidays, celebrations and adventures">
+				<img loading="lazy" class="extra-strap mhide" src="<?php bloginfo('template_directory'); ?>/images/extstrap.jpg" alt="extraordinary holidays, celebrations and adventures">
 			</div>
+
+			<?php 	if ( get_current_blog_id() !== 1 ) { ?>
+
 			<div class="span8">
-				<div class="menu-top-menu-container floatright">
-					<ul class="topmenu">
-						<?php
-							foreach($katglobals['menus']['sites']['footer_items'] as $i) {
-								create_menu_li($i);
-							}
-						?>
-					</ul>
+				<div class="floatright">
+
+					<div class="footertp">
+						<!-- TrustBox widget - Micro Star -->
+						<div class="trustpilot-widget" data-locale="en-GB" data-template-id="5419b732fbfb950b10de65e5" data-businessunit-id="5cd41de1c4dd7a0001be3a14" data-style-height="24px" data-style-width="100%" data-theme="dark">
+							<a href="https://uk.trustpilot.com/review/www.kateandtoms.com" target="_blank" rel="noopener">Trustpilot</a>
+						</div>
+						<!-- End TrustBox widget -->
+					</div>
+
 				</div>
 			</div>
+
+			<?php } ?>
+
 		</div>
 	</div>
 </div>
@@ -179,9 +188,9 @@
 			</div>
 			<div class="span4 pull-right text-right">
 
-					<strong>call us</strong>
-					<li><a href="#">01242 235151</a></li>
-					<li>open 7 days a week</li>
+				<strong>call us</strong>
+				<li><a href="#">01242 235151</a></li>
+				<li>open 7 days a week</li>
 
 			</div>
 
@@ -217,7 +226,7 @@
 
 <?php if (get_current_blog_id() == 8) { ?>
 <div id="getintouch" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="display:none;">
-<?php
+	<?php
 	switch_to_blog(1);
 	echo do_shortcode('[contact-form-7 id="'.$contact_id.'" title="Contact form" html_class="use-floating-validation-tip"]');
 	restore_current_blog();
@@ -228,9 +237,9 @@
 
 
 <script>
-document.addEventListener( 'wpcf7mailsent', function( event ) {
-    location = '/thank-you';
-}, false );
+document.addEventListener('wpcf7mailsent', function(event) {
+	location = '/thank-you';
+}, false);
 </script>
 
 <?php wp_footer(); ?>
